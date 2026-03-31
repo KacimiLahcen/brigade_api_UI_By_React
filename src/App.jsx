@@ -32,6 +32,7 @@ function App() {
       </h1>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
         {/* send data by Props  */}
         {plates.map(plate => (
           <PlateCard 
