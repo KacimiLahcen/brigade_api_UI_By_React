@@ -11,3 +11,4 @@ export default function PlateCard({ name, price, description, is_available }) { 
  
   );
 }
+
