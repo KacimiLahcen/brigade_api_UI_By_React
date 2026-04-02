@@ -1,6 +1,9 @@
 import { NavLink, Link } from 'react-router-dom';
 
 export default function Navbar() {
+  // You can change this to true to see the profile icon when logged in
+  const isSignedIn = false; 
+
   const getNavClass = ({ isActive }) => 
     `text-sm font-bold uppercase tracking-widest transition-colors duration-300 py-2 border-b-2 ${
       isActive 
@@ -28,11 +31,26 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Action Button */}
+          {/* Action Button / Profile */}
           <div>
-            <button className="bg-transparent border-2 border-[#7cfc00] text-[#7cfc00] hover:bg-[#7cfc00] hover:text-white px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 shadow-[0_0_10px_rgba(124,252,0,0.2)] hover:shadow-[0_0_20px_rgba(124,252,0,0.5)]">
-              Sign In
-            </button>
+            {!isSignedIn ? (
+              <Link 
+                to="/login"
+                className="inline-block bg-transparent border-2 border-[#7cfc00] text-[#7cfc00] hover:bg-[#7cfc00] hover:text-white px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider transition-all duration-300 shadow-[0_0_10px_rgba(124,252,0,0.2)] hover:shadow-[0_0_20px_rgba(124,252,0,0.5)]"
+              >
+                Sign In
+              </Link>
+            ) : (
+              <Link 
+                to="/profile" 
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 border-2 border-[#7cfc00] hover:bg-gray-700 transition-colors shadow-[0_0_10px_rgba(124,252,0,0.2)]"
+                title="Go to Profile"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#7cfc00]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
+            )}
           </div>
           
         </div>
