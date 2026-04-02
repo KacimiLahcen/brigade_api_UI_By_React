@@ -4,6 +4,9 @@ import Navbar from './MyComponents/Navbar';
 import Home from './pages/Home';
 import Plates from './pages/Plates';
 import PlateDetail from './pages/PlateDetail';
+import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
   return (
@@ -14,6 +17,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/plates" element={<Plates />} />
           <Route path="/plates/:id" element={<PlateDetail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </div>
     </Router>
