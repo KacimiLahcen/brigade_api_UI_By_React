@@ -38,7 +38,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* Action Button / Profile */}
+          {/* Profile Button */}
           <div>
             {!isSignedIn ? (
               <Link 
