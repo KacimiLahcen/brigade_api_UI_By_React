@@ -9,7 +9,7 @@ export default function PlateDetail() {
   const [plate, setPlate] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // J4: Fetching plate details from the API when the page loads
+  // Fetching plate details from the API when the page loads
   useEffect(() => {
     api.get(`/plates/${id}`)
       .then(response => {
@@ -27,7 +27,7 @@ export default function PlateDetail() {
     return (
       <div className="bg-gray-950 min-h-screen flex items-center justify-center">
         <div className="text-[#7cfc00] text-xl font-black animate-bounce uppercase tracking-widest">
-          Loading Masterpiece...
+          Loading Plate...
         </div>
       </div>
     );
