@@ -1,18 +1,21 @@
 ﻿import React from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
+  const { user } = useAuth();
+  
   return (
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-8">
         <div className="flex items-center space-x-6">
           <img
-            src="https://ui-avatars.com/api/?name=John+Doe&background=random"
+            src={`https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=random`}
             alt="Profile Avatar"
             className="w-24 h-24 rounded-full border-4 border-gray-200"
           />
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">John Doe</h1>
-            <p className="text-gray-500 text-lg">johndoe@example.com</p>
+            <h1 className="text-3xl font-bold text-gray-800">{user?.name || 'User Name'}</h1>
+            <p className="text-gray-500 text-lg">{user?.email || 'user@example.com'}</p>
             <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
               Premium Member
             </span>

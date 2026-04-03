@@ -1,6 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,6 +8,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -15,25 +16,9 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await api.post('/login', { email, password });
-      
-      // to support different Laravel token formats ('token' or 'access_token')
-      const token = response.data?.token || response.data?.access_token || response.data?.plainTextToken;
-      
-      // If the API sends a token, save it. Otherwise (if Sanctum cookies are used), save a dummy flag to update Navbar
-      if (token) {
-        localStorage.setItem('token', token);
-      } else {
-        localStorage.setItem('token', 'authenticated');
-      }
-
-      if (response.data?.user) {
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-      }
-      
-      // Redirect to profile and update Navbar
-      window.location.href = '/profile'; 
-
+      await login(email, password);
+      // Redirect to plates after login
+      navigate('/plates');
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');

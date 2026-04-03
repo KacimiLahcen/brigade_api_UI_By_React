@@ -1,14 +1,15 @@
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
+  const { user, token, logout } = useAuth();
+  const navigate = useNavigate();
   
-  // Check if user is signed in by checking local storage token
-  const isSignedIn = !!localStorage.getItem('token'); 
+  const isSignedIn = !!token; 
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/login';
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
   };
 
   const getNavClass = ({ isActive }) => 
@@ -49,6 +50,7 @@ export default function Navbar() {
               </Link>
             ) : (
               <div className="flex items-center space-x-4">
+                <span className="text-gray-300 font-medium">Hello, {user?.name || 'User'}</span>
                 <Link 
                   to="/profile" 
                   className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 border-2 border-[#7cfc00] hover:bg-gray-700 transition-colors shadow-[0_0_10px_rgba(124,252,0,0.2)]"
