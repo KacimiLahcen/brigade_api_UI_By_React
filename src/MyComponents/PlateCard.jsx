@@ -21,14 +21,15 @@ export default function PlateCard({ id, name, price, description, is_available, 
         {/* Dark Vignette Overlay for Premium Vibe */}
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-black/30 opacity-90"></div>
         
-        {/* Availability Badge */}
+        {/* availability badge */}
         <div className="absolute top-5 left-5">
           <div className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest backdrop-blur-sm ${
             is_available 
               ? 'bg-[#7cfc00] text-white shadow-lg' 
               : 'bg-gray-700/80 text-gray-300'
           }`}>
-            {is_available ? 'Available' : 'Sold Out'}
+             {/* better to hide it if not available; i"ll handle the logic */}
+            {is_available ? 'Available' : 'Coming soon'} 
           </div>
         </div>
       </div>
