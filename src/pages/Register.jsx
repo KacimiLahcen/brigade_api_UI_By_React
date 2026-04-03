@@ -58,7 +58,7 @@ const Register = () => {
 
   return (
     <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-md border border-gray-100">
-      <h2 className="text-3xl font-black text-gray-900 mb-6 text-center">Create Account</h2>
+      <h2 className="text-3xl font-black text-gray-900 mb-6 text-center">Create Your Account</h2>
 
       {error && (
         <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-semibold">
@@ -74,7 +74,7 @@ const Register = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7cfc00] focus:border-transparent outline-none transition"
-            placeholder="John Doe" 
+            placeholder="lahcen" 
             required
           />
         </div>
@@ -85,7 +85,7 @@ const Register = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7cfc00] focus:border-transparent outline-none transition"
-            placeholder="johndoe@example.com" 
+            placeholder="lahcen@example.com" 
             required
           />
         </div>
