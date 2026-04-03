@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PlateCard from '../MyComponents/PlateCard';
+import api from '../api/axios'; // Ensure you have created the axios instance
 
 export default function Plates() {
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  // Adding state for real API data
+  const [plates, setPlates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Static Mock Data required by instruction
+  /* // Static Mock Data required by instruction - KEPT AS COMMENTED
   const STATIC_PLATES = [
     { id: 1, name: "Wagyu Signature Burger", price: 140, description: "Premium wagyu beef patty with truffle mayo and aged cheddar.", is_available: true },
     { id: 2, name: "Spicy Tuna Roll", price: 95, description: "Fresh tuna, spicy mayo, tempura flakes and premium nori.", is_available: true },
@@ -15,12 +20,49 @@ export default function Plates() {
     { id: 7, name: "Crispy Calamari", price: 75, description: "Lightly battered calamari rings with lemon aioli.", is_available: true },
     { id: 8, name: "Pistachio Gelato", price: 45, description: "Authentic Italian gelato made with Sicilian pistachios.", is_available: false },
   ];
+  */
 
-  // Filtering Logic
-  const filteredPlates = STATIC_PLATES.filter((plate) => 
-    plate.name.toLowerCase().includes(search.toLowerCase()) || 
-    plate.description.toLowerCase().includes(search.toLowerCase())
-  );
+  // J4: Fetching real data from Laravel API
+  useEffect(() => {
+    api.get('/plates')
+      .then(response => {
+        // Assuming your API returns the plates array directly
+        setPlates(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("API Error:", error);
+        setLoading(false);
+      });
+  }, []);
+
+  // Extract unique categories dynamically from the plates data
+  // (Assumes your Laravel API returns a 'category' string or object. Adjust if needed)
+  const categories = ["All", ...new Set(plates.map(plate => {
+    if (!plate.category) return null;
+    return typeof plate.category === 'object' ? plate.category.name : plate.category;
+  }).filter(Boolean))];
+
+  // Filtering Logic updated to use 'plates' state and selected category
+  const filteredPlates = plates.filter((plate) => {
+    const matchesSearch = plate.name.toLowerCase().includes(search.toLowerCase()) || 
+                          plate.description.toLowerCase().includes(search.toLowerCase());
+    
+    // Fallback if the category structure from the API changes
+    const plateCat = plate.category ? (typeof plate.category === 'object' ? plate.category.name : plate.category) : null;
+    const matchesCategory = selectedCategory === "All" || plateCat === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  // Loading State UI
+  if (loading) {
+    return (
+      <div className="bg-gray-950 min-h-screen flex items-center justify-center">
+        <h2 className="text-[#7cfc00] text-2xl font-black animate-pulse">PREPARING YOUR MENU...</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-950 min-h-screen text-gray-100 pb-20">
@@ -57,6 +99,26 @@ export default function Plates() {
             </div>
             
           </div>
+
+          {/* Category Filter Pills */}
+          {categories.length > 1 && (
+            <div className="flex flex-wrap gap-3 mt-10 pt-6 border-t border-gray-800/50">
+              {categories.map((category, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-5 py-2 rounded-full text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-300 ${
+                    selectedCategory === category 
+                      ? 'bg-[#7cfc00] text-gray-950 shadow-[0_0_15px_rgba(124,252,0,0.4)] border border-[#7cfc00]' 
+                      : 'bg-gray-950 text-gray-400 border border-gray-800 hover:border-gray-500 hover:text-white'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          )}
+
         </div>
       </div>
 
@@ -67,7 +129,12 @@ export default function Plates() {
           /* Grid responsive: 1 col on mobile -> 2 tablet -> 3 lg -> 4 xl */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 xl:gap-10">
             {filteredPlates.map(plate => (
-              <PlateCard key={plate.id} {...plate} />
+              <PlateCard 
+                key={plate.id} 
+                {...plate} 
+                // Handling storage image URL from Laravel
+                image={plate.image ? `http://localhost:8000/storage/${plate.image}` : null}
+              />
             ))}
           </div>
         ) : (

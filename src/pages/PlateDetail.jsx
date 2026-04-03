@@ -1,11 +1,47 @@
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import api from '../api/axios';
 
 export default function PlateDetail() {
-  // Extract dynamic 'id' parameter from react-router v6 hook
   const { id } = useParams();
   
-  // Premium Placeholder image for UI visual demonstration
-  const placeholderImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1200';
+  // State to hold the plate details and loading status 
+  const [plate, setPlate] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // J4: Fetching plate details from the API when the page loads
+  useEffect(() => {
+    api.get(`/plates/${id}`)
+      .then(response => {
+        setPlate(response.data);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching plate details:", error);
+        setLoading(false);
+      });
+  }, [id]);
+
+  // Loading state UI
+  if (loading) {
+    return (
+      <div className="bg-gray-950 min-h-screen flex items-center justify-center">
+        <div className="text-[#7cfc00] text-xl font-black animate-bounce uppercase tracking-widest">
+          Loading Masterpiece...
+        </div>
+      </div>
+    );
+  }
+
+  // Error state if plate not found or API error
+  if (!plate) {
+    return (
+      <div className="bg-gray-950 min-h-screen flex flex-col items-center justify-center text-white">
+        <h2 className="text-3xl font-black mb-6">Plate Not Found!</h2>
+        <Link to="/plates" className="text-[#7cfc00] font-bold underline">Return to Menu</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-950 min-h-screen pt-12 pb-24 px-4 sm:px-6 lg:px-8">
@@ -25,39 +61,37 @@ export default function PlateDetail() {
         {/* Detail Card Container */}
         <div className="bg-gray-900 rounded-[3rem] overflow-hidden border border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex flex-col md:flex-row">
           
-          {/* Left/Top Area: Large Image Display */}
+          {/* Left Area: Dynamic Image from API */}
           <div className="w-full md:w-1/2 relative min-h-[400px] md:min-h-[600px] bg-gray-800">
             <img 
-              src={placeholderImage} 
-              alt={`Plate ID ${id}`}
+              src={plate.image ? `http://localhost:8000/storage/${plate.image}` : 'https://via.placeholder.com/1200'} 
+              alt={plate.name}
               className="absolute inset-0 w-full h-full object-cover"
             />
-            {/* Dark Fade overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent md:bg-gradient-to-r md:from-transparent md:to-gray-900/90" />
             
-            {/* Tag Overlay */}
             <div className="absolute top-6 left-6">
               <span className="bg-black/60 backdrop-blur-md text-white border border-gray-700 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                Plate #{id}
+                Plate #{plate.id}
               </span>
             </div>
           </div>
           
-          {/* Right/Bottom Area: Details & Actions */}
+          {/* Right Area: Real Details & Actions */}
           <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-center">
             
             <div className="mb-4 inline-block">
-              <span className="bg-[#7cfc00]/10 text-[#7cfc00] border border-[#7cfc00]/30 px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">
-                Chef's Recommendation
+              <span className={`border px-3 py-1.5 rounded-full text-xs font-black uppercase tracking-widest ${plate.is_available ? 'bg-[#7cfc00]/10 text-[#7cfc00] border-[#7cfc00]/30' : 'bg-red-500/10 text-red-500 border-red-500/30'}`}>
+                {plate.is_available ? "Chef's Recommendation" : "Currently Unavailable"}
               </span>
             </div>
             
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight tracking-tighter">
-              Premium <br/> <span className="text-[#7cfc00]">Signature Dish</span>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight tracking-tighter uppercase">
+              {plate.name}
             </h1>
             
             <p className="text-gray-400 text-lg sm:text-xl font-light mb-10 leading-relaxed border-l-4 border-gray-800 pl-6">
-              Discover unparalleled flavors in this signature dish. We use the finest ingredients paired with innovative culinary techniques to bring you an unforgettable dining experience straight from the heart of La Brigade.
+              {plate.description}
             </p>
 
             {/* Price and Action Section */}
@@ -65,12 +99,15 @@ export default function PlateDetail() {
               <div className="flex flex-col">
                 <span className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Total Price</span>
                 <p className="text-5xl font-black text-white">
-                  140 <span className="text-[#7cfc00] text-2xl font-bold ml-1">MAD</span>
+                  {plate.price} <span className="text-[#7cfc00] text-2xl font-bold ml-1">MAD</span>
                 </p>
               </div>
               
-              <button className="w-full sm:w-auto bg-[#7cfc00] hover:bg-[#5daf00] text-white px-10 py-5 rounded-full font-black text-sm uppercase tracking-widest transition-all duration-300 shadow-[0_0_20px_rgba(124,252,0,0.3)] hover:shadow-[0_0_30px_rgba(124,252,0,0.5)] transform hover:scale-105">
-                Place Order
+              <button 
+                disabled={!plate.is_available}
+                className={`w-full sm:w-auto px-10 py-5 rounded-full font-black text-sm uppercase tracking-widest transition-all duration-300 shadow-lg ${plate.is_available ? 'bg-[#7cfc00] hover:bg-[#5daf00] text-white hover:scale-105 shadow-[#7cfc00]/20' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}`}
+              >
+                {plate.is_available ? 'Place Order' : 'Sold Out'}
               </button>
             </div>
 

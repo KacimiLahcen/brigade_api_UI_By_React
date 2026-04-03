@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom';
 
-export default function PlateCard({ id, name, price, description, is_available }) {
-  // Hardcoded premium placeholder for UI layout testing
+export default function PlateCard({ id, name, price, description, is_available, image }) {
+  // default if no image provided
   const placeholderImage = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=800';
+  
+  // use the API image if provided
+  const displayImage = image || placeholderImage;
 
   return (
     <div className="bg-gray-900 rounded-[2rem] overflow-hidden border border-gray-800 flex flex-col h-full group hover:border-[#7cfc00]/60 transition-colors duration-500 shadow-xl">
@@ -10,7 +13,7 @@ export default function PlateCard({ id, name, price, description, is_available }
       {/* Top Image Section */}
       <div className="relative aspect-[4/3] w-full overflow-hidden">
         <img 
-          src={placeholderImage} 
+          src={displayImage} 
           alt={name}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.15]"
         />
