@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import PlateCard from '../MyComponents/PlateCard';
-import api from '../api/axios'; // Ensure you have created the axios instance
+import api from '../api/axios'; // obligate to create the axios instance
 
 export default function Plates() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  // Adding state for real API data
+  // adding state for real API data
   const [plates, setPlates] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  /* // Static Mock Data required by instruction - KEPT AS COMMENTED
+  /* // Static Mock Data required by instructions, but now replaced by real API fetching
   const STATIC_PLATES = [
     { id: 1, name: "Wagyu Signature Burger", price: 140, description: "Premium wagyu beef patty with truffle mayo and aged cheddar.", is_available: true },
     { id: 2, name: "Spicy Tuna Roll", price: 95, description: "Fresh tuna, spicy mayo, tempura flakes and premium nori.", is_available: true },
@@ -22,7 +22,7 @@ export default function Plates() {
   ];
   */
 
-  // J4: Fetching real data from Laravel API
+  // Fetching real data from Laravel API
   useEffect(() => {
     api.get('/plates')
       .then(response => {
@@ -59,7 +59,7 @@ export default function Plates() {
   if (loading) {
     return (
       <div className="bg-gray-950 min-h-screen flex items-center justify-center">
-        <h2 className="text-[#7cfc00] text-2xl font-black animate-pulse">PREPARING YOUR MENU...</h2>
+        <h2 className="text-[#7cfc00] text-2xl font-black animate-pulse">Preparing Menu...</h2>
       </div>
     );
   }
@@ -75,7 +75,7 @@ export default function Plates() {
             {/* Title */}
             <div>
               <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white uppercase tracking-tighter mb-4 leading-tight">
-                Our Premium <span className="text-[#7cfc00]">Menu</span>
+                Our Premium <span className="text-[#7cfc00]">PLATES</span>
               </h1>
               <p className="text-gray-400 text-lg sm:text-xl font-light max-w-lg">
                 Discover our carefully crafted dishes made from the finest ingredients.
@@ -87,7 +87,7 @@ export default function Plates() {
               <div className="relative group">
                 <input 
                   type="text" 
-                  placeholder="Rechercher un plat..." 
+                  placeholder="Rechercher un plate..." 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="w-full bg-gray-900 border border-gray-800 focus:border-[#7cfc00] rounded-2xl py-4 pl-12 pr-6 text-white placeholder-gray-500 outline-none transition-all duration-300 focus:ring-4 focus:ring-[#7cfc00]/20 shadow-inner"
