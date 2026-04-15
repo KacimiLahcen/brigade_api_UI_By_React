@@ -1,40 +1,49 @@
 ﻿import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 
+
+// 1. Zod Schema: validation rules for the registration form
+const registerSchema = z.object({
+
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  password_confirmation: z.string()
+}).refine((data) => data.password === data.password_confirmation, {
+  message: "Passwords do not match",
+  path: ["password_confirmation"],
+});
+
+
 const Register = () => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordConfirmation, setPasswordConfirmation] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  // 2. Initialize React Hook Form
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(registerSchema)
+  });
+
+  // 3. Logic to store data in DB (Linking with Laravel)
+  const onSubmit = async (data) => {
     setLoading(true);
     setError('');
 
-    if (password !== passwordConfirmation) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
-    }
-
     try {
-      const response = await api.post('/register', { 
-        name, 
-        email, 
-        password,
-        password_confirmation: passwordConfirmation,
+      // make API call to Laravel backend to register the user
+      const response = await api.post('/register', {
+        ...data,
         role: 'client'
       });
 
-      // Support different Laravel token formats ('token' or 'access_token')
+      // handle the token 
       const tokenObj = response.data?.token || response.data?.access_token || response.data?.plainTextToken;
-      
-      // If the API sends a token, save it. Otherwise (if Sanctum cookies are used), save a dummy flag to update Navbar
+
       if (tokenObj) {
         localStorage.setItem('token', tokenObj);
       } else {
@@ -44,86 +53,103 @@ const Register = () => {
       if (response.data?.user) {
         localStorage.setItem('user', JSON.stringify(response.data.user));
       }
-      
-      // Force reload or redirect to profile to update Navbar state
+
+      // redirect to profile and update application state
       window.location.href = '/profile';
 
     } catch (err) {
       console.error(err);
+      // Display error message from backend 
       setError(err.response?.data?.message || 'Registration failed. Please check your inputs.');
     } finally {
       setLoading(false);
     }
   };
 
+
+
+
+
+
+
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-md border border-gray-100">
-      <h2 className="text-3xl font-black text-gray-900 mb-6 text-center">Create Your Account</h2>
+    <div className="bg-gray-950 min-h-screen flex items-center justify-center px-4 py-12">
+      <div className="bg-gray-900 p-8 rounded-[2.5rem] border border-gray-800 w-full max-w-md shadow-2xl relative overflow-hidden">
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-semibold">
-          {error}
-        </div>
-      )}
+        {/* Decorative Element */}
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#7cfc00]/5 rounded-full blur-3xl"></div>
 
-      <form className="space-y-4" onSubmit={handleRegister}>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700">Full Name</label>
-          <input 
-            type="text" 
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7cfc00] focus:border-transparent outline-none transition"
-            placeholder="lahcen" 
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700">Email</label>
-          <input 
-            type="email" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7cfc00] focus:border-transparent outline-none transition"
-            placeholder="lahcen@example.com" 
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700">Password</label>
-          <input 
-            type="password" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7cfc00] focus:border-transparent outline-none transition"
-            placeholder="••••••••" 
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-semibold text-gray-700">Confirm Password</label>
-          <input 
-            type="password" 
-            value={passwordConfirmation}
-            onChange={(e) => setPasswordConfirmation(e.target.value)}
-            className="w-full mt-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7cfc00] focus:border-transparent outline-none transition"
-            placeholder="••••••••" 
-            required
-          />
-        </div>
-        <button 
-          type="submit" 
-          disabled={loading}
-          className={`w-full py-3 font-black rounded-lg transition shadow-lg ${loading ? 'bg-gray-400 text-gray-700 cursor-not-allowed' : 'bg-[#7cfc00] text-gray-950 hover:bg-[#6be000]'}`}
-        >
-          {loading ? 'Registering...' : 'Register'}
-        </button>
-      </form>
-      <div className="mt-6 text-center text-sm text-gray-500">
-        Already have an account?{' '}
-        <Link to="/login" className="text-blue-600 font-semibold hover:underline">
-          Login here
-        </Link>
+        <h2 className="text-4xl font-black text-white mb-2 text-center uppercase tracking-tighter italic">
+          Create <span className="text-[#7cfc00]">Account</span>
+        </h2> 
+        <p className="text-gray-500 text-center mb-8 text-sm uppercase tracking-widest">Join RESTO BRIGADE</p>
+
+        {/* Global Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/50 text-red-500 rounded-xl text-xs font-bold uppercase tracking-tight">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Full Name */}
+          <div>
+            <label className="text-gray-400 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">Full Name</label>
+            <input
+              {...register("name")}
+              placeholder="e.g. Lahcen"
+              className={`w-full bg-gray-950 border ${errors.name ? 'border-red-500' : 'border-gray-800'} p-4 rounded-2xl text-white focus:border-[#7cfc00] outline-none transition-all placeholder:text-gray-700`}
+            />
+            {errors.name && <p className="text-red-500 text-[10px] mt-2 font-bold uppercase tracking-tighter">{errors.name.message}</p>}
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="text-gray-400 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">Email Address</label>
+            <input
+              {...register("email")}
+              placeholder="lahcen@example.com"
+              className={`w-full bg-gray-950 border ${errors.email ? 'border-red-500' : 'border-gray-800'} p-4 rounded-2xl text-white focus:border-[#7cfc00] outline-none transition-all placeholder:text-gray-700`}
+            />
+            {errors.email && <p className="text-red-500 text-[10px] mt-2 font-bold uppercase tracking-tighter">{errors.email.message}</p>}
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="text-gray-400 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">Password</label>
+            <input
+              type="password"
+              {...register("password")}
+              placeholder="••••••••"
+              className={`w-full bg-gray-950 border ${errors.password ? 'border-red-500' : 'border-gray-800'} p-4 rounded-2xl text-white focus:border-[#7cfc00] outline-none transition-all placeholder:text-gray-700`}
+            />
+            {errors.password && <p className="text-red-500 text-[10px] mt-2 font-bold uppercase tracking-tighter">{errors.password.message}</p>}
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="text-gray-400 text-[10px] font-black uppercase ml-1 mb-2 block tracking-[0.2em]">Confirm Password</label>
+            <input
+              type="password"
+              {...register("password_confirmation")}
+              placeholder="••••••••"
+              className={`w-full bg-gray-950 border ${errors.password_confirmation ? 'border-red-500' : 'border-gray-800'} p-4 rounded-2xl text-white focus:border-[#7cfc00] outline-none transition-all placeholder:text-gray-700`}
+            />
+            {errors.password_confirmation && <p className="text-red-500 text-[10px] mt-2 font-bold uppercase tracking-tighter">{errors.password_confirmation.message}</p>}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#7cfc00] text-black font-black py-5 rounded-2xl uppercase tracking-[0.2em] hover:bg-[#6be000] transition-all shadow-xl shadow-[#7cfc00]/10 disabled:bg-gray-800 disabled:text-gray-600 active:scale-95"
+          >
+            {loading ? 'Processing...' : 'Register Now'}
+          </button>
+        </form>
+
+        <p className="text-gray-500 text-center mt-8 text-[10px] uppercase font-bold tracking-widest">
+          Already a member? <Link to="/login" className="text-[#7cfc00] hover:underline ml-1">Sign In</Link>
+        </p>
       </div>
     </div>
   );
