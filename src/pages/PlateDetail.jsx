@@ -18,7 +18,7 @@ export default function PlateDetail() {
     isError, 
     error 
   } = useQuery({
-    queryKey: ['plate', id], // ca
+    queryKey: ['plate', id], // unique key for this query, including the plate ID for caching and refetching
     queryFn: () => fetchPlateDetails(id),
     staleTime: 1000 * 60 * 10, // plate details are considered fresh for 10 minutes
   });
